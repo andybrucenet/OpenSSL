@@ -24,6 +24,7 @@ for i in iphoneos iphonesimulator macosx macosx_catalyst ; do
   fi
   if [ ! -d ./openssl ] ; then
     echo 'Missing openssl'
+    cd ../..
     continue
   fi
   echo "cd openssl" | tee -a "$the_log"
