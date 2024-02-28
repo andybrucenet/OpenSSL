@@ -118,7 +118,7 @@ build()
    LOG_PATH="${PREFIX}.build.log"
    echo "Building ${LOG_PATH}"
    make &> ${LOG_PATH}
-   make install &>> ${LOG_PATH}
+   make install >> ${LOG_PATH} 2>&1
    cd ${BASE_PWD}
 
    # Add arch to library
