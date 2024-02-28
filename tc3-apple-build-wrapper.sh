@@ -18,8 +18,14 @@ for i in iphoneos iphonesimulator macosx macosx_catalyst ; do
   echo "cd $i/include" | tee -a "$the_log"
   cd $i/include 2>&1 | tee -a "$the_log"
   the_rc=$? ; [ $the_rc -ne 0 ] && continue
-  echo "mv OpenSSL openssl" | tee -a "$the_log"
-  mv OpenSSL openssl 2>&1 | tee -a "$the_log"
+  if [ -d ./OpenSSL ] ; then
+    echo "mv OpenSSL openssl" | tee -a "$the_log"
+    mv OpenSSL openssl 2>&1 | tee -a "$the_log"
+  fi
+  if [ ! -d ./openssl ] ; then
+    echo 'Missing openssl'
+    continue
+  fi
   echo "cd openssl" | tee -a "$the_log"
   cd openssl 2>&1 | tee -a "$the_log"
   the_rc=$?
