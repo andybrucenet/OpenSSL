@@ -1,5 +1,9 @@
 # OpenSSL-Universal
 
+## NOTE: TripleCyber
+
+Use `tc3-android-build-wrapper.sh`
+
 OpenSSL [CocoaPods](https://cocoapods.org/), [Carthage](https://github.com/Carthage/Carthage) and [Swift Package Manager](https://swift.org/package-manager/) package for iOS and macOS. A complete solution to OpenSSL on iOS and macOS. The package comes with precompiled libraries and includes a script to build newer versions if necessary.
 
 The current version contains binaries built with the latest iOS SDK (target 11.0), and the latest macOS SDK (target 13) for all supported architectures (including macOS Catalyst).
