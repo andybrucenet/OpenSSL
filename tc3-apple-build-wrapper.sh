@@ -17,14 +17,21 @@ echo 'Updating include files...' | tee -a "$the_log"
 for i in iphoneos iphonesimulator macosx macosx_catalyst ; do
   echo "cd $i/include" | tee -a "$the_log"
   cd $i/include 2>&1 | tee -a "$the_log"
+  the_rc=$? ; [ $the_rc -ne 0 ] && continue
   echo "mv OpenSSL openssl" | tee -a "$the_log"
   mv OpenSSL openssl 2>&1 | tee -a "$the_log"
   echo "cd openssl" | tee -a "$the_log"
   cd openssl 2>&1 | tee -a "$the_log"
-  echo "sed -ie 's/<OpenSSL/<openssl/' *.h" | tee -a "$the_log"
-  sed -ie 's/<OpenSSL/<openssl/' *.h 2>&1 | tee -a "$the_log"
-  echo 'cd ../../..' | tee -a "$the_log"
-  cd ../../.. 2>&1 | tee -a "$the_log"
+  the_rc=$?
+  if [ $the_rc -eq 0 ] ; then
+    echo "sed -ie 's/<OpenSSL/<openssl/' *.h" | tee -a "$the_log"
+    sed -ie 's/<OpenSSL/<openssl/' *.h 2>&1 | tee -a "$the_log"
+    echo 'cd ../../..' | tee -a "$the_log"
+    cd ../../.. 2>&1 | tee -a "$the_log"
+  else
+    echo 'cd ../..' | tee -a "$the_log"
+    cd ../.. 2>&1 | tee -a "$the_log"
+  fi
   echo '' | tee -a "$the_log"
 done
 echo 'Done.' | tee -a "$the_log"

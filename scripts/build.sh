@@ -47,21 +47,21 @@ configure() {
    local SDK=
    case "$OS" in
       iPhoneOS)
-	 SDK="${IPHONEOS_SDK}"
-	 ;;
+   SDK="${IPHONEOS_SDK}"
+   ;;
       iPhoneSimulator)
-	 SDK="${IPHONESIMULATOR_SDK}"
-	 ;;
+   SDK="${IPHONESIMULATOR_SDK}"
+   ;;
       MacOSX)
-	 SDK="${OSX_SDK}"
-	 ;;
+   SDK="${OSX_SDK}"
+   ;;
       MacOSX_Catalyst)
-	 SDK="${OSX_SDK}"
-	 ;;
+   SDK="${OSX_SDK}"
+   ;;
       *)
-	 echo "Unsupported OS '${OS}'!" >&1
-	 exit 1
-	 ;;
+   echo "Unsupported OS '${OS}'!" >&1
+   exit 1
+   ;;
    esac
 
    local PREFIX="${BUILD_DIR}/${OPENSSL_VERSION}-${OS}-${ARCH}"
@@ -83,6 +83,7 @@ configure() {
    elif [ "$OS" == "iPhoneOS" ]; then
       ${SRC_DIR}/Configure ios-cross-$ARCH no-asm no-shared --prefix="${PREFIX}" &> "${PREFIX}.config.log"
    fi
+   cat "${PREFIX}.config.log"
 }
 
 build()
@@ -118,15 +119,21 @@ build()
    LOG_PATH="${PREFIX}.build.log"
    echo "Building ${LOG_PATH}"
    make &> ${LOG_PATH}
-   make install >> ${LOG_PATH} 2>&1
+   cat ${LOG_PATH}
+   make install &> ${LOG_PATH}
+   cat ${LOG_PATH}
    cd ${BASE_PWD}
 
    # Add arch to library
    if [ -f "${SCRIPT_DIR}/../${TYPE}/lib/libcrypto.a" ]; then
+      echo "xcrun lipo '${SCRIPT_DIR}/../${TYPE}/lib/libcrypto.a' '${PREFIX}/lib/libcrypto.a' -create -output '${SCRIPT_DIR}/../${TYPE}/lib/libcrypto.a'"
       xcrun lipo "${SCRIPT_DIR}/../${TYPE}/lib/libcrypto.a" "${PREFIX}/lib/libcrypto.a" -create -output "${SCRIPT_DIR}/../${TYPE}/lib/libcrypto.a"
+      echo "xcrun lipo '${SCRIPT_DIR}/../${TYPE}/lib/libssl.a' '${PREFIX}/lib/libssl.a' -create -output '${SCRIPT_DIR}/../${TYPE}/lib/libssl.a'"
       xcrun lipo "${SCRIPT_DIR}/../${TYPE}/lib/libssl.a" "${PREFIX}/lib/libssl.a" -create -output "${SCRIPT_DIR}/../${TYPE}/lib/libssl.a"
    else
+      echo "cp '${PREFIX}/lib/libcrypto.a' '${SCRIPT_DIR}/../${TYPE}/lib/libcrypto.a'"
       cp "${PREFIX}/lib/libcrypto.a" "${SCRIPT_DIR}/../${TYPE}/lib/libcrypto.a"
+      echo "cp '${PREFIX}/lib/libssl.a' '${SCRIPT_DIR}/../${TYPE}/lib/libssl.a'"
       cp "${PREFIX}/lib/libssl.a" "${SCRIPT_DIR}/../${TYPE}/lib/libssl.a"
    fi
 
