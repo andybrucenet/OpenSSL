@@ -3,6 +3,9 @@
 # Yay shell scripting! This script builds a static version of
 # OpenSSL for iOS and OSX that contains code for arm64, x86_64.
 
+# set to ONE to force cleanup
+BUILD_WANTS_CLEANUP="${BUILD_WANTS_CLEANUP:-0}"
+
 set -e
 # set -x
 
@@ -20,6 +23,8 @@ fi
 
 export OPENSSL_LOCAL_CONFIG_DIR="${SCRIPT_DIR}/../config"
 
+# just use a single temp build dir so we don't have a full rebuild *every time rerun*
+LOCAL_TMP_BUILD_DIR='/tmp/OpenSSL-build'
 
 DEVELOPER=$(xcode-select --print-path)
 
@@ -151,11 +156,21 @@ build()
       cp "${PREFIX}/lib/libssl.a" "${SCRIPT_DIR}/../${TYPE}/lib/libssl.a"
    fi
 
+   # change into build folder and run tests
+   if [ x"$TYPE" == xmacosx ] ; then
+      local l_arch_name="`uname -m`"
+      if [ x"$ARCH" = x"$l_arch_name" ] ; then
+         cd "${SRC_DIR}"
+         make test || return $?
+      fi
+   fi
+
    rm -rf "${SRC_DIR}"
 }
 
 build_ios() {
-   local TMP_BUILD_DIR=$( mktemp -d )
+   #local TMP_BUILD_DIR=$( mktemp -d )
+   local TMP_BUILD_DIR="$LOCAL_TMP_BUILD_DIR"
 
    # Clean up whatever was left from our previous build
    rm -rf "${SCRIPT_DIR}"/../{iphonesimulator/include,iphonesimulator/lib}
@@ -209,11 +224,15 @@ build_ios() {
    grep -rl '#\s*include\s*<openssl' --include \*.h ${SCRIPT_DIR}/../iphoneos/include | xargs -I@ sed -i '' -e 's/#[[:space:]]*include[[:space:]]*<openssl/#include <OpenSSL/gi' @
    grep -rl '#\s*include\s*<openssl' --include \*.h ${SCRIPT_DIR}/../iphonesimulator/include | xargs -I@ sed -i '' -e 's/#[[:space:]]*include[[:space:]]*<openssl/#include <OpenSSL/gi' @
 
-   rm -rf ${TMP_BUILD_DIR}
+   if [ x"$BUILD_WANTS_CLEANUP" = x1 ] ; then
+      rm -rf ${TMP_BUILD_DIR}
+   fi
+   return 0
 }
 
 build_macos() {
-   local TMP_BUILD_DIR=$( mktemp -d )
+   #local TMP_BUILD_DIR=$( mktemp -d )
+   local TMP_BUILD_DIR="$LOCAL_TMP_BUILD_DIR"
 
    # Clean up whatever was left from our previous build
    rm -rf "${SCRIPT_DIR}"/../{macosx/include,macosx/lib}
@@ -240,11 +259,14 @@ build_macos() {
    echo "#elif defined(__APPLE__) && defined (__arm64__)" >> ${OPENSSLCONF_PATH}
    cat ${TMP_BUILD_DIR}/${OPENSSL_VERSION}-MacOSX-arm64/include/openssl/opensslconf.h >> ${OPENSSLCONF_PATH}
    echo "#endif" >> ${OPENSSLCONF_PATH}
-   
+
    # Update include "openssl/" to "OpenSSL/"
    grep -rl '#\s*include\s*<openssl' --include \*.h ${SCRIPT_DIR}/../macosx/include | xargs -I@ sed -i '' -e 's/#[[:space:]]*include[[:space:]]*<openssl/#include <OpenSSL/gi' @
 
-   rm -rf ${TMP_BUILD_DIR}
+   if [ x"$BUILD_WANTS_CLEANUP" = x1 ] ; then
+      rm -rf ${TMP_BUILD_DIR}
+   fi
+   return 0
 }
 
 build_catalyst() {
@@ -278,7 +300,10 @@ build_catalyst() {
    # Update include "openssl/" to "OpenSSL/"
    grep -rl '#\s*include\s*<openssl' --include \*.h ${SCRIPT_DIR}/../macosx_catalyst/include | xargs -I@ sed -i '' -e 's/#[[:space:]]*include[[:space:]]*<openssl/#include <OpenSSL/gi' @
 
-   rm -rf ${TMP_BUILD_DIR}
+   if [ x"$BUILD_WANTS_CLEANUP" = x1 ] ; then
+      rm -rf ${TMP_BUILD_DIR}
+   fi
+   return 0
 }
 
 # Start
@@ -298,4 +323,4 @@ fi
 
 build_ios
 build_macos
-build_catalyst
+#build_catalyst
