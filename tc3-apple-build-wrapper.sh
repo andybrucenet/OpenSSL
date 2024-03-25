@@ -5,10 +5,11 @@
 the_log=/tmp/build_openssl_apple.log
 echo 'build_openssl_apple: Start...' | tee "$the_log"
 echo '' | tee -a "$the_log"
-echo 'remove temporary files...' | tee "$the_log"
-echo "rm -fR ./iphoneos/* ./iphonesimulator/* ./macosx/* ./macosx_catalyst/*" | tee -a "$the_log"
-rm -fR ./iphoneos/* ./iphonesimulator/* ./macosx/* ./macosx_catalyst/* 2>&1 | tee -a "$the_log"
-echo '' | tee -a "$the_log"
+# no more auto-remove...
+#echo 'remove temporary files...' | tee "$the_log"
+#echo "rm -fR ./iphoneos/* ./iphonesimulator/* ./macosx/* ./macosx_catalyst/*" | tee -a "$the_log"
+#rm -fR ./iphoneos/* ./iphonesimulator/* ./macosx/* ./macosx_catalyst/* 2>&1 | tee -a "$the_log"
+#echo '' | tee -a "$the_log"
 echo "scripts/build.sh" | tee -a "$the_log"
 scripts/build.sh 2>&1 | tee -a "$the_log"
 the_rc=$? ; [ $the_rc -ne 0 ] && exit $the_rc
