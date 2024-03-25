@@ -1,5 +1,10 @@
 *.DS_Store
 
+# generated files
+iphoneos/
+iphonesimulator/
+macosx/
+
 .vscode/
 .build/
 .swiftpm/
