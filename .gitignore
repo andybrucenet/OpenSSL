@@ -4,6 +4,7 @@
 iphoneos/
 iphonesimulator/
 macosx/
+macosx_catalyst/
 
 .vscode/
 .build/
