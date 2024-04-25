@@ -1,9 +1,5 @@
 # OpenSSL-Universal
 
-## NOTE: TripleCyber
-
-Use `tc3-android-build-wrapper.sh`
-
 OpenSSL [CocoaPods](https://cocoapods.org/), [Carthage](https://github.com/Carthage/Carthage) and [Swift Package Manager](https://swift.org/package-manager/) package for iOS and macOS. A complete solution to OpenSSL on iOS and macOS. The package comes with precompiled libraries and includes a script to build newer versions if necessary.
 
 The current version contains binaries built with the latest iOS SDK (target 11.0), and the latest macOS SDK (target 13) for all supported architectures (including macOS Catalyst).
@@ -27,7 +23,7 @@ The financial sustainability of the project is possible thanks to the ongoing co
 
 - Static library [libcrypto.a, libssl.a](iphoneos/lib/)
 - [OpenSSL.framework](Frameworks/)
-- [OpenSSL.xcframework](Frameworks/)
+- [OpenSSL.xcframework](Frameworks/OpenSSL.xcframework)
 
 ### Why?
 
@@ -58,7 +54,7 @@ Binary `OpenSSL.xcframework` (Used by the Swift Package Manager package integrat
 
 ```
 dependencies: [
-    .package(url: "https://github.com/krzyzanowskim/OpenSSL.git", .upToNextMinor(from: "3.1.4000"))
+    .package(url: "https://github.com/krzyzanowskim/OpenSSL.git", .upToNextMinor(from: "3.1.5001"))
 ]
 ```
 
@@ -84,7 +80,7 @@ binary "https://raw.githubusercontent.com/krzyzanowskim/OpenSSL/main/OpenSSL.jso
 
 ### Authors
 
-[Marcin Krzyżanowski](https://twitter.com/krzyzanowskim)
+[Marcin Krzyżanowski](https://x.com/krzyzanowskim)
 
 ## FAQ etc.
 #### Where can I use OpenSSL-Universal?

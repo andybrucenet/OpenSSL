@@ -3,9 +3,6 @@
 # Yay shell scripting! This script builds a static version of
 # OpenSSL for iOS and OSX that contains code for arm64, x86_64.
 
-# set to ONE to force cleanup
-BUILD_WANTS_CLEANUP="${BUILD_WANTS_CLEANUP:-0}"
-
 set -e
 # set -x
 
@@ -23,31 +20,12 @@ fi
 
 export OPENSSL_LOCAL_CONFIG_DIR="${SCRIPT_DIR}/../config"
 
-# just use a single temp build dir so we don't have a full rebuild *every time rerun*
-LOCAL_TMP_BUILD_DIR='/tmp/OpenSSL-build'
 
 DEVELOPER=$(xcode-select --print-path)
 
-IPHONEOS_DEPLOYMENT_VERSION="${IPHONEOS_DEPLOYMENT_VERSION:-11.0}"
-export IPHONEOS_DEPLOYMENT_VERSION
 IPHONEOS_SDK=$(xcrun --sdk iphoneos --show-sdk-path)
 IPHONESIMULATOR_SDK=$(xcrun --sdk iphonesimulator --show-sdk-path)
 OSX_SDK=$(xcrun --sdk macosx --show-sdk-path)
-
-MACOSX_DEPLOYMENT_TARGET="${MACOSX_DEPLOYMENT_TARGET:-10.14}"
-export MACOSX_DEPLOYMENT_TARGET
-
-# options
-cat <<EOS
-OPENSSL_VERSION="$OPENSSL_VERSION"
-DEVELOPER="$DEVELOPER"
-IPHONEOS_DEPLOYMENT_VERSION="${IPHONEOS_DEPLOYMENT_VERSION}"
-IPHONEOS_SDK="$IPHONEOS_SDK"
-IPHONESIMULATOR_SDK="$IPHONESIMULATOR_SDK"
-OSX_SDK="$OSX_SDK"
-MACOSX_DEPLOYMENT_TARGET="${MACOSX_DEPLOYMENT_TARGET}"
-
-EOS
 
 # Turn versions like 1.2.3 into numbers that can be compare by bash.
 version()
@@ -66,21 +44,21 @@ configure() {
    local SDK=
    case "$OS" in
       iPhoneOS)
-   SDK="${IPHONEOS_SDK}"
-   ;;
+	 SDK="${IPHONEOS_SDK}"
+	 ;;
       iPhoneSimulator)
-   SDK="${IPHONESIMULATOR_SDK}"
-   ;;
+	 SDK="${IPHONESIMULATOR_SDK}"
+	 ;;
       MacOSX)
-   SDK="${OSX_SDK}"
-   ;;
+	 SDK="${OSX_SDK}"
+	 ;;
       MacOSX_Catalyst)
-   SDK="${OSX_SDK}"
-   ;;
+	 SDK="${OSX_SDK}"
+	 ;;
       *)
-   echo "Unsupported OS '${OS}'!" >&1
-   exit 1
-   ;;
+	 echo "Unsupported OS '${OS}'!" >&1
+	 exit 1
+	 ;;
    esac
 
    local PREFIX="${BUILD_DIR}/${OPENSSL_VERSION}-${OS}-${ARCH}"
@@ -91,7 +69,7 @@ configure() {
       echo "Failed to parse SDK path '${SDK}'!" >&1
       exit 2
    fi
-   
+
 
    if [ "$OS" == "MacOSX" ]; then
       ${SRC_DIR}/Configure macos-$ARCH no-asm no-shared --prefix="${PREFIX}" &> "${PREFIX}.config.log"
@@ -102,7 +80,6 @@ configure() {
    elif [ "$OS" == "iPhoneOS" ]; then
       ${SRC_DIR}/Configure ios-cross-$ARCH no-asm no-shared --prefix="${PREFIX}" &> "${PREFIX}.config.log"
    fi
-   cat "${PREFIX}.config.log"
 }
 
 build()
@@ -131,46 +108,30 @@ build()
 
    # fix headers for Swift
 
-   sed -ie "s/BIGNUM \*I,/BIGNUM \*i,/g" ${SRC_DIR}/crypto/rsa/rsa_local.h   
+   sed -ie "s/BIGNUM \*I,/BIGNUM \*i,/g" ${SRC_DIR}/crypto/rsa/rsa_local.h
 
    configure "${OS}" $ARCH ${BUILD_DIR} ${SRC_DIR}
 
    LOG_PATH="${PREFIX}.build.log"
    echo "Building ${LOG_PATH}"
    make &> ${LOG_PATH}
-   cat ${LOG_PATH}
    make install &> ${LOG_PATH}
-   cat ${LOG_PATH}
    cd ${BASE_PWD}
 
    # Add arch to library
    if [ -f "${SCRIPT_DIR}/../${TYPE}/lib/libcrypto.a" ]; then
-      echo "xcrun lipo '${SCRIPT_DIR}/../${TYPE}/lib/libcrypto.a' '${PREFIX}/lib/libcrypto.a' -create -output '${SCRIPT_DIR}/../${TYPE}/lib/libcrypto.a'"
       xcrun lipo "${SCRIPT_DIR}/../${TYPE}/lib/libcrypto.a" "${PREFIX}/lib/libcrypto.a" -create -output "${SCRIPT_DIR}/../${TYPE}/lib/libcrypto.a"
-      echo "xcrun lipo '${SCRIPT_DIR}/../${TYPE}/lib/libssl.a' '${PREFIX}/lib/libssl.a' -create -output '${SCRIPT_DIR}/../${TYPE}/lib/libssl.a'"
       xcrun lipo "${SCRIPT_DIR}/../${TYPE}/lib/libssl.a" "${PREFIX}/lib/libssl.a" -create -output "${SCRIPT_DIR}/../${TYPE}/lib/libssl.a"
    else
-      echo "cp '${PREFIX}/lib/libcrypto.a' '${SCRIPT_DIR}/../${TYPE}/lib/libcrypto.a'"
       cp "${PREFIX}/lib/libcrypto.a" "${SCRIPT_DIR}/../${TYPE}/lib/libcrypto.a"
-      echo "cp '${PREFIX}/lib/libssl.a' '${SCRIPT_DIR}/../${TYPE}/lib/libssl.a'"
       cp "${PREFIX}/lib/libssl.a" "${SCRIPT_DIR}/../${TYPE}/lib/libssl.a"
-   fi
-
-   # change into build folder and run tests
-   if [ x"$TYPE" == xmacosx ] ; then
-      local l_arch_name="`uname -m`"
-      if [ x"$ARCH" = x"$l_arch_name" ] ; then
-         cd "${SRC_DIR}"
-         make test || return $?
-      fi
    fi
 
    rm -rf "${SRC_DIR}"
 }
 
 build_ios() {
-   #local TMP_BUILD_DIR=$( mktemp -d )
-   local TMP_BUILD_DIR="$LOCAL_TMP_BUILD_DIR"
+   local TMP_BUILD_DIR=$( mktemp -d )
 
    # Clean up whatever was left from our previous build
    rm -rf "${SCRIPT_DIR}"/../{iphonesimulator/include,iphonesimulator/lib}
@@ -219,20 +180,16 @@ build_ios() {
    echo "#elif defined(__APPLE__) && defined (__arm64__)" >> ${OPENSSLCONF_PATH}
    cat ${TMP_BUILD_DIR}/${OPENSSL_VERSION}-iPhoneOS-arm64/include/openssl/opensslconf.h >> ${OPENSSLCONF_PATH}
    echo "#endif" >> ${OPENSSLCONF_PATH}
-   
+
    # Update include "openssl/" to "OpenSSL/"
    grep -rl '#\s*include\s*<openssl' --include \*.h ${SCRIPT_DIR}/../iphoneos/include | xargs -I@ sed -i '' -e 's/#[[:space:]]*include[[:space:]]*<openssl/#include <OpenSSL/gi' @
    grep -rl '#\s*include\s*<openssl' --include \*.h ${SCRIPT_DIR}/../iphonesimulator/include | xargs -I@ sed -i '' -e 's/#[[:space:]]*include[[:space:]]*<openssl/#include <OpenSSL/gi' @
 
-   if [ x"$BUILD_WANTS_CLEANUP" = x1 ] ; then
-      rm -rf ${TMP_BUILD_DIR}
-   fi
-   return 0
+   rm -rf ${TMP_BUILD_DIR}
 }
 
 build_macos() {
-   #local TMP_BUILD_DIR=$( mktemp -d )
-   local TMP_BUILD_DIR="$LOCAL_TMP_BUILD_DIR"
+   local TMP_BUILD_DIR=$( mktemp -d )
 
    # Clean up whatever was left from our previous build
    rm -rf "${SCRIPT_DIR}"/../{macosx/include,macosx/lib}
@@ -263,10 +220,7 @@ build_macos() {
    # Update include "openssl/" to "OpenSSL/"
    grep -rl '#\s*include\s*<openssl' --include \*.h ${SCRIPT_DIR}/../macosx/include | xargs -I@ sed -i '' -e 's/#[[:space:]]*include[[:space:]]*<openssl/#include <OpenSSL/gi' @
 
-   if [ x"$BUILD_WANTS_CLEANUP" = x1 ] ; then
-      rm -rf ${TMP_BUILD_DIR}
-   fi
-   return 0
+   rm -rf ${TMP_BUILD_DIR}
 }
 
 build_catalyst() {
@@ -300,10 +254,7 @@ build_catalyst() {
    # Update include "openssl/" to "OpenSSL/"
    grep -rl '#\s*include\s*<openssl' --include \*.h ${SCRIPT_DIR}/../macosx_catalyst/include | xargs -I@ sed -i '' -e 's/#[[:space:]]*include[[:space:]]*<openssl/#include <OpenSSL/gi' @
 
-   if [ x"$BUILD_WANTS_CLEANUP" = x1 ] ; then
-      rm -rf ${TMP_BUILD_DIR}
-   fi
-   return 0
+   rm -rf ${TMP_BUILD_DIR}
 }
 
 # Start
@@ -323,4 +274,4 @@ fi
 
 build_ios
 build_macos
-#build_catalyst
+build_catalyst

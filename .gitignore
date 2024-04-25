@@ -1,10 +1,6 @@
 *.DS_Store
 
-# generated files
-iphoneos/
-iphonesimulator/
-macosx/
-macosx_catalyst/
+OpenSSL.xcworkspace
 
 .vscode/
 .build/
