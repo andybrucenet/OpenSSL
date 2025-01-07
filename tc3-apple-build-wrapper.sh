@@ -18,7 +18,7 @@ scripts/build.sh
 the_rc=$? ; [ $the_rc -ne 0 ] && exit $the_rc
 echo ''
 echo 'Updating include files...'
-for i in iphoneos iphonesimulator macosx macosx_catalyst ; do
+for i in iphoneos iphonesimulator macosx ; do
   echo "cd $i/include"
   cd $i/include
   the_rc=$? ; [ $the_rc -ne 0 ] && continue
