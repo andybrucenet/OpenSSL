@@ -1,8 +1,6 @@
 # OpenSSL-Universal
 
-OpenSSL [CocoaPods](https://cocoapods.org/), [Carthage](https://github.com/Carthage/Carthage) and [Swift Package Manager](https://swift.org/package-manager/) package for iOS and macOS. A complete solution to OpenSSL on iOS and macOS. The package comes with precompiled libraries and includes a script to build newer versions if necessary.
-
-The current version contains binaries built with the latest iOS SDK (target 11.0), and the latest macOS SDK (target 13) for all supported architectures (including macOS Catalyst).
+OpenSSL [CocoaPods](https://cocoapods.org/), [Carthage](https://github.com/Carthage/Carthage) and [Swift Package Manager](https://swift.org/package-manager/) package for iOS, macOS, Catalyst, tvOS, visionOS, watchOS. A complete solution to OpenSSL. The package comes with precompiled libraries and includes a script to build newer versions if necessary.
 
 ### Support & Sponsors
 
@@ -18,12 +16,15 @@ The financial sustainability of the project is possible thanks to the ongoing co
 
 - iOS with architectures: arm64 + simulator (x86_64, arm64)
 - macOS with architectures: x86_64, arm64 (including Catalyst target)
+- tvOS with architectures: arm64
+- visionOS with archtectures: arm64
+- watchOS with architectures: arm64, arm64_32
 
 #### Output Formats
 
 - Static library [libcrypto.a, libssl.a](iphoneos/lib/)
-- [OpenSSL.framework](Frameworks/)
-- [OpenSSL.xcframework](Frameworks/OpenSSL.xcframework)
+- Frameworks [OpenSSL.framework](Frameworks/)
+- XCFramework [OpenSSL.xcframework](https://github.com/krzyzanowskim/OpenSSL/releases/latest/download/OpenSSL.xcframework.zip)
 
 ### Why?
 
@@ -39,40 +40,41 @@ You don't have to use the pre-built binaries I provide. You can build it locally
 ```
 $ git clone https://github.com/krzyzanowskim/OpenSSL.git
 $ cd OpenSSL
-$ make
+$ make SIGNING_IDENTITY="Apple Distribution"
 ```
 
 The result of a build process is put inside [Frameworks](Frameworks/) directory.
 
-### Hardened Runtime (macOS) and Xcode
-
-Binary `OpenSSL.xcframework` (Used by the Swift Package Manager package integration) won't load properly in your app if the app uses **Sign to Run Locally**  Signing Certificate with Hardened Runtime enabled. It is possible to setup Xcode like this. To solve the problem you have two options:
-- Use proper Signing Certificate, eg. *Development* <- this is the proper action
-- Use `Disable Library Validation` aka `com.apple.security.cs.disable-library-validation` entitlement
-
 ### Swift Package Manager
 
-```
+I advised you to use [OpenSSL-Package](https://github.com/krzyzanowskim/OpenSSL-Package) which is a pure binary distribution that distribute the very same binary but avoid fetching this git repository which is significant in size.
+
+```swift
 dependencies: [
-    .package(url: "https://github.com/krzyzanowskim/OpenSSL.git", .upToNextMinor(from: "3.1.5001"))
+    .package(url: "https://github.com/krzyzanowskim/OpenSSL-Package.git", from: "3.3.2000")
 ]
+```
+
+and then as a dependency for the Package target utilizing OpenSSL:
+
+```swift
+.target(
+    name: "MyApp",
+    dependencies: [
+        .product(name: "OpenSSL", package: "OpenSSL-Package")
+    ]
+),
 ```
 
 ### CocoaPods
 
-````
+```
 pod 'OpenSSL-Universal'
-````
+```
 
 ### Carthage
 
-* If building from source is preferred:
-
-```
-github "krzyzanowskim/OpenSSL"
-```
-
-* If using a prebuilt framework is preferred:
+* Using a prebuilt framework is preferred:
 
 ```
 binary "https://raw.githubusercontent.com/krzyzanowskim/OpenSSL/main/OpenSSL.json"
@@ -84,9 +86,8 @@ binary "https://raw.githubusercontent.com/krzyzanowskim/OpenSSL/main/OpenSSL.jso
 
 ## FAQ etc.
 #### Where can I use OpenSSL-Universal?
-These libraries work for both iOS and macOS. It is your prerogative to check. Ask yourself, are you trying to write an app for old devices? new devices only? all iOS devices? only macOS?, etc ::
+These libraries work for iOS, macOS, appleTV, visionOS, watchOS. It is your prerogative to check. Ask yourself, are you trying to write an app for old devices? new devices only? all iOS devices? only macOS?, etc ::
 
 #### What is XCFramework?
 
 OpenSSL.xcframework is distributed as a multiplatform XCFramework bundle, for more information checkout the documentation [Distributing Binary Frameworks as Swift Packages](https://developer.apple.com/documentation/xcode/distributing-binary-frameworks-as-swift-packages)
-
