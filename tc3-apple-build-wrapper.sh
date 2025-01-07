@@ -1,6 +1,9 @@
 #!/bin/bash
 # tc3-apple-build-wrapper.sh, ABr
 #
+# assume known latest version for compile
+OPENSSL_VERSION="${OPENSSL_VERSION:3.4.0}"
+#
 # Build openssl for apple with mods to compile correctly
 the_log=/tmp/build_openssl_apple.log
 echo 'build_openssl_apple: Start...'
