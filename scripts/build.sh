@@ -480,6 +480,7 @@ if [ ! -f "${SCRIPT_DIR}/../openssl-${OPENSSL_VERSION}.tar.gz" ]; then
    rm -f "${SCRIPT_DIR}/../openssl-${OPENSSL_VERSION}.tar.gz.sha256"
 fi
 
+# ABr: build only the environments we need
 #build_watchos
 #build_appletvos
 build_ios
