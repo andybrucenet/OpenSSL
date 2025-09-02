@@ -98,17 +98,17 @@ configure() {
 
 
    if [ "$OS" == "MacOSX" ]; then
-      ${SRC_DIR}/Configure macos-$ARCH no-asm no-shared --prefix="${PREFIX}" &> "${PREFIX}.config.log"
+      ${SRC_DIR}/Configure macos-$ARCH no-asm no-shared no-tests --prefix="${PREFIX}" &> "${PREFIX}.config.log"
    elif [ "$OS" == "MacOSX_Catalyst" ]; then
-      ${SRC_DIR}/Configure mac-catalyst-$ARCH no-asm no-shared --prefix="${PREFIX}" &> "${PREFIX}.config.log"
+      ${SRC_DIR}/Configure mac-catalyst-$ARCH no-asm no-shared no-tests --prefix="${PREFIX}" &> "${PREFIX}.config.log"
    elif [ "$OS" == "iPhoneSimulator" ]; then
-      ${SRC_DIR}/Configure ios-sim-cross-$ARCH no-asm no-shared --prefix="${PREFIX}" &> "${PREFIX}.config.log"
+      ${SRC_DIR}/Configure ios-sim-cross-$ARCH no-asm no-shared no-tests --prefix="${PREFIX}" &> "${PREFIX}.config.log"
    elif [ "$OS" == "iPhoneOS" ]; then
-      ${SRC_DIR}/Configure ios-cross-$ARCH no-asm no-shared --prefix="${PREFIX}" &> "${PREFIX}.config.log"
+      ${SRC_DIR}/Configure ios-cross-$ARCH no-asm no-shared no-tests --prefix="${PREFIX}" &> "${PREFIX}.config.log"
    elif [ "$OS" == "visionSimulator" ]; then
-      ${SRC_DIR}/Configure xros-sim-cross-$ARCH no-asm no-shared --prefix="${PREFIX}" &> "${PREFIX}.config.log"
+      ${SRC_DIR}/Configure xros-sim-cross-$ARCH no-asm no-shared no-tests --prefix="${PREFIX}" &> "${PREFIX}.config.log"
    elif [ "$OS" == "visionOS" ]; then
-      ${SRC_DIR}/Configure xros-cross-$ARCH no-asm no-shared --prefix="${PREFIX}" &> "${PREFIX}.config.log"
+      ${SRC_DIR}/Configure xros-cross-$ARCH no-asm no-shared no-tests --prefix="${PREFIX}" &> "${PREFIX}.config.log"
    elif [ "$OS" == "AppleTVSimulator" ]; then
       ${SRC_DIR}/Configure tvos-sim-cross-$ARCH no-asm no-shared no-tests --prefix="${PREFIX}" &> "${PREFIX}.config.log"
    elif [ "$OS" == "AppleTVOS" ]; then
@@ -472,9 +472,12 @@ if [ ! -f "${SCRIPT_DIR}/../openssl-${OPENSSL_VERSION}.tar.gz" ]; then
    curl -fL "https://github.com/openssl/openssl/releases/download/openssl-${OPENSSL_VERSION}/openssl-${OPENSSL_VERSION}.tar.gz.sha256" -o "${SCRIPT_DIR}/../openssl-${OPENSSL_VERSION}.tar.gz.sha256"
    DIGEST=$( cat ${SCRIPT_DIR}/../openssl-${OPENSSL_VERSION}.tar.gz.sha256 )
 
-   if [[ "$(shasum -a 256 "openssl-${OPENSSL_VERSION}.tar.gz" | awk '{ print " "$1}')" != "${DIGEST}" ]]
+   CALCULATED_DIGEST=$(shasum -a 256 "openssl-${OPENSSL_VERSION}.tar.gz")
+   if [[ "${CALCULATED_DIGEST}" != "${DIGEST}" ]]
    then
-      echo "openssl-${OPENSSL_VERSION}.tar.gz: checksum mismatch"
+      echo "openssl-${OPENSSL_VERSION}.tar.gz: checksum mismatch. Calculated \"${CALCULATED_DIGEST}\". Received: \"${DIGEST}\""
+      rm -f "${SCRIPT_DIR}/../openssl-${OPENSSL_VERSION}.tar.gz"
+      rm -f "${SCRIPT_DIR}/../openssl-${OPENSSL_VERSION}.tar.gz.sha256"
       exit 1
    fi
    rm -f "${SCRIPT_DIR}/../openssl-${OPENSSL_VERSION}.tar.gz.sha256"
