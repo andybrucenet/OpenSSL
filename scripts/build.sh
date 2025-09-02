@@ -52,11 +52,11 @@ configure() {
    local SDK=
    case "$OS" in
       iPhoneOS)
-	 SDK="${IPHONEOS_SDK}"
-	 ;;
+   SDK="${IPHONEOS_SDK}"
+   ;;
       iPhoneSimulator)
-	 SDK="${IPHONESIMULATOR_SDK}"
-	 ;;
+   SDK="${IPHONESIMULATOR_SDK}"
+   ;;
       visionOS)
     SDK="${XROS_SDK}"
     ;;
@@ -64,27 +64,27 @@ configure() {
     SDK="${XRSIMULATOR_SDK}"
     ;;
       AppleTVOS)
-	 SDK="${APPLETVOS_SDK}"
-	 ;;
+   SDK="${APPLETVOS_SDK}"
+   ;;
       AppleTVSimulator)
-	 SDK="${APPLETVSIMULATOR_SDK}"
-	 ;;
+   SDK="${APPLETVSIMULATOR_SDK}"
+   ;;
       watchOS)
-	 SDK="${WATCHOS_SDK}"
-	 ;;
+   SDK="${WATCHOS_SDK}"
+   ;;
       watchSimulator)
-	 SDK="${WATCHSIMULATOR_SDK}"
-	 ;;
+   SDK="${WATCHSIMULATOR_SDK}"
+   ;;
       MacOSX)
-	 SDK="${OSX_SDK}"
-	 ;;
+   SDK="${OSX_SDK}"
+   ;;
       MacOSX_Catalyst)
-	 SDK="${OSX_SDK}"
-	 ;;
+   SDK="${OSX_SDK}"
+   ;;
       *)
-	 echo "Unsupported OS '${OS}'!" >&1
-	 exit 1
-	 ;;
+   echo "Unsupported OS '${OS}'!" >&1
+   exit 1
+   ;;
    esac
 
    local PREFIX="${BUILD_DIR}/${OPENSSL_VERSION}-${OS}-${ARCH}"
@@ -471,8 +471,10 @@ if [ ! -f "${SCRIPT_DIR}/../openssl-${OPENSSL_VERSION}.tar.gz" ]; then
    curl -fL "https://github.com/openssl/openssl/releases/download/openssl-${OPENSSL_VERSION}/openssl-${OPENSSL_VERSION}.tar.gz" -o "${SCRIPT_DIR}/../openssl-${OPENSSL_VERSION}.tar.gz"
    curl -fL "https://github.com/openssl/openssl/releases/download/openssl-${OPENSSL_VERSION}/openssl-${OPENSSL_VERSION}.tar.gz.sha256" -o "${SCRIPT_DIR}/../openssl-${OPENSSL_VERSION}.tar.gz.sha256"
    DIGEST=$( cat ${SCRIPT_DIR}/../openssl-${OPENSSL_VERSION}.tar.gz.sha256 )
+   DIGEST="`echo "$DIGEST" | awk '{print $1}'`"
 
    CALCULATED_DIGEST=$(shasum -a 256 "openssl-${OPENSSL_VERSION}.tar.gz")
+   CALCULATED_DIGEST="`echo "$CALCULATED_DIGEST" | awk '{print $1}'`"
    if [[ "${CALCULATED_DIGEST}" != "${DIGEST}" ]]
    then
       echo "openssl-${OPENSSL_VERSION}.tar.gz: checksum mismatch. Calculated \"${CALCULATED_DIGEST}\". Received: \"${DIGEST}\""
