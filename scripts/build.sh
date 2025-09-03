@@ -98,25 +98,45 @@ configure() {
 
 
    if [ "$OS" == "MacOSX" ]; then
+		 set -x
       ${SRC_DIR}/Configure macos-$ARCH no-asm no-shared no-module no-tests --prefix="${PREFIX}" &> "${PREFIX}.config.log"
+		 set +x
    elif [ "$OS" == "MacOSX_Catalyst" ]; then
+		 set -x
       ${SRC_DIR}/Configure mac-catalyst-$ARCH no-asm no-shared no-tests --prefix="${PREFIX}" &> "${PREFIX}.config.log"
+		 set +x
    elif [ "$OS" == "iPhoneSimulator" ]; then
+		 set -x
       ${SRC_DIR}/Configure ios-sim-cross-$ARCH no-asm no-shared no-module no-tests --prefix="${PREFIX}" &> "${PREFIX}.config.log"
+		 set +x
    elif [ "$OS" == "iPhoneOS" ]; then
+		 set -x
       ${SRC_DIR}/Configure ios-cross-$ARCH no-asm no-shared no-module no-tests --prefix="${PREFIX}" &> "${PREFIX}.config.log"
+		 set +x
    elif [ "$OS" == "visionSimulator" ]; then
+		 set -x
       ${SRC_DIR}/Configure xros-sim-cross-$ARCH no-asm no-shared no-tests --prefix="${PREFIX}" &> "${PREFIX}.config.log"
+		 set +x
    elif [ "$OS" == "visionOS" ]; then
+		 set -x
       ${SRC_DIR}/Configure xros-cross-$ARCH no-asm no-shared no-tests --prefix="${PREFIX}" &> "${PREFIX}.config.log"
+		 set +x
    elif [ "$OS" == "AppleTVSimulator" ]; then
+		 set -x
       ${SRC_DIR}/Configure tvos-sim-cross-$ARCH no-asm no-shared no-tests --prefix="${PREFIX}" &> "${PREFIX}.config.log"
+		 set +x
    elif [ "$OS" == "AppleTVOS" ]; then
+		 set -x
       ${SRC_DIR}/Configure tvos-cross-$ARCH no-asm no-shared no-tests --prefix="${PREFIX}" &> "${PREFIX}.config.log"
+		 set +x
    elif [ "$OS" == "watchSimulator" ]; then
+		 set -x
       ${SRC_DIR}/Configure watchos-sim-cross-$ARCH no-asm no-shared no-tests --prefix="${PREFIX}" &> "${PREFIX}.config.log"
+		 set +x
    elif [ "$OS" == "watchOS" ]; then
+		 set -x
       ${SRC_DIR}/Configure watchos-cross-$ARCH no-asm no-shared no-tests --prefix="${PREFIX}" &> "${PREFIX}.config.log"
+		 set +x
    fi
 }
 
